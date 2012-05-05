@@ -22,6 +22,7 @@
     </style>
     <link href="data/css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="data/css/codemirror.css" rel="stylesheet">
+    <link href="data/css/scheem.css" rel="stylesheet">
 
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -53,7 +54,10 @@
             <form id="editor-form">
                 <textarea id="editor">(+ 1 2)</textarea>
 
-                <p><button id="evaluate-button" data-action="evaluate" class="btn btn-primary btn-large">Evaluate</button></p>
+                <div class="btn-group">
+                    <button id="evaluate-button" data-action="evaluate" class="btn btn-primary btn-large">Evaluate</button>
+                    <button id="trace-button" data-action="trace" class="btn btn-primary btn-large">Trace</button>
+                </div>
             </form>
         </div>
 
@@ -71,7 +75,7 @@
                 </div>
                 <div id="trace" class="accordion-body collapse">
                     <div class="accordion-inner">
-                        Evaluate code first!
+                        Trace code first!
                     </div>
                 </div>
             </div>
@@ -99,10 +103,10 @@
     <script src="data/js/jquery-1.7.2.min.js"></script>
     <script src="data/js/bootstrap.min.js"></script>
     <script src="data/js/codemirror.js"></script>
-    <script src="data/js/util/runmode.js"></script>
     <script src="data/js/scheme.js"></script>
     <script src="data/js/scheem.js"></script>
-    <script src="https://raw.github.com/QWRp/PL101/master/scheem/interpreter.js"></script>
+    <script src="data/js/tracetohtml.js"></script>
+    <script src="../../../PL101/scheem/interpreter.js"></script>
 
     <script>
         $("#error_box").hide();
@@ -121,18 +125,28 @@
 
         editor.focus();
 
-        $('#editor-form').submit(function (event) {
+        function evaluateScheem(event) {
             event.preventDefault();
-            var input = $('#editor').val();
+
+            var input = editor.getValue();
             try {
-                var result = scheem.evalString(input);
+                var trace = $(this).data('action') === 'trace';
+                var result = scheem.evalString(input, trace);
 
                 $('#error_box').hide();
                 var out = $('#output');
-                $('div', out).html('Result : ' + JSON.stringify(result));
+                $('div', out).html('Result : ' + JSON.stringify((trace) ? result.value : result));
                 out.collapse('show');
 
-                $('#trace div').html('Result : ' + JSON.stringify(result));
+                if(trace) {
+                    var tr = $('#trace');
+                    $('div', tr).html('Result : ' + traceToHTML(result));
+                    tr.collapse('show');
+
+                    $('.scheem-popover', tr).popover();
+                } else {
+                    $('#trace div').html("Click 'Trace' to see code trace.");
+                }
             } catch (e) {
                 console.log(e);
 
@@ -143,7 +157,10 @@
                 $('#output div').html('Fix errors and try again!');
                 $('#trace div').html('Fix errors and try again!');
             }
-        });
+        }
+
+        $('#evaluate-button').bind('click', evaluateScheem);
+        $('#trace-button').bind('click', evaluateScheem);
     </script>
 </body>
 </html>

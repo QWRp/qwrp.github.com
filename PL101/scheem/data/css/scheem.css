@@ -1,0 +1,15 @@
+.scheem-expr {
+    color: #006400;
+}
+.scheem-number {
+    color: #00008b;
+}
+.scheem-boolean {
+    color: #008b8b;
+}
+.scheem-variable {
+    color: #8b008b;
+}
+.scheem-popover {
+    border: 1px dotted #87ceeb;
+}
