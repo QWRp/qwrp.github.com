@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tortoise Interpreter by QWRp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="data/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+        .CodeMirror, #turtlecanvas {
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        .activeline {
+            background: #dcdcdc !important;
+        }
+    </style>
+    <link href="data/css/codemirror.css" rel="stylesheet">
+    <link href="data/css/elegant.css" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class ="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                </a>
+                <a class="brand" href="#">Tortoise Online Interpreter</a>
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        <li class="active"><a href="#">Home</a></li>
+                        <li><a href="test/">Unit Tests</a></li>
+						<li class="dropdown" id="examples_dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#examples_dropdown">
+                                Examples <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" data-example="spawning_turtles" class="load_example">Spawning turtles</a></li>
+                                <li><a href="#" data-example="frac_tree" class="load_example">Fractal tree (lordlorik, McLeopold)</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hero-unit">
+            <h1>Tortoise</h1>
+            <form>
+                <textarea id="input">var turtles := 10, heading := 0, heading_change := 360 / turtles;
+
+while (turtles > 0) {
+    scale(300);
+    set_heading(heading);
+    set_pen_color( (turtles % 2 == 0) ? #02d : #dead00 );
+    forward(1);
+
+    heading := heading + heading_change;
+
+    spawn_turtle();
+    turtles := turtles - 1;
+}</textarea>
+
+                <div class="btn-group">
+                    <button id="submit-button" data-action="evaluate" class="btn btn-primary btn-large">Evaluate</button>
+                    <button id="clear-button" data-action="clear" class="btn btn-primary btn-large">Clear</button>
+                </div>
+            </form>
+
+            <div class="clearfix">&nbsp;</div>
+
+            <div class="alert alert-error" id="error_box">
+                <h4 class="alert-heading" id="error_type">Parse error!</h4>
+                <span id="error_message">Some error</span>
+            </div>
+
+            <div class="clearfix">&nbsp;</div>
+            <div id="turtlecanvas"></div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-group" id="console_acc">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#console_acc" href="#console_body">
+                        Console
+                    </a>
+                </div>
+                <div id="console_body" class="accordion-body collapse">
+                    <div id="console" class="accordion-inner">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>See more on <a href="https://github.com/QWRp/PL101">GitHub</a>.</p>
+        </footer>
+    </div>
+
+	        <script id="spawning_turtles" type="text/tortoise">
+var turtles := 10, heading := 0, heading_change := 360 / turtles;
+
+while (turtles > 0) {
+    scale(300);
+    set_heading(heading);
+    set_pen_color( (turtles % 2 == 0) ? #02d : #dead00 );
+    forward(1);
+
+    heading := heading + heading_change;
+
+    spawn_turtle();
+    turtles := turtles - 1;
+}
+        </script>
+        <script id="frac_tree" type="text/tortoise">
+define curve(size, angle, scale, count) {
+    if (!count) return;
+    forward(size);
+    left(angle);
+    curve(size * scale, angle, scale, count - 1);
+
+    right(90);
+    curve(size * scale * scale, angle, scale, count - 1);
+    left(90);
+
+    right(angle + 180);
+    pen_down();
+    set_pen_color(count < 2 ? #0a0 : #a50);
+    set_pen_width(count < 2 ? 10 : count);
+    forward(size);
+    pen_up();
+    left(180);
+}
+
+pen_up();
+right(180);
+forward(100);
+right(180);
+curve(100, 29, 0.80, 10);
+        </script>
+	
+    <script src="data/js/jquery-1.7.2.min.js"></script>
+    <script src="data/js/bootstrap.min.js"></script>
+    <script src="data/js/codemirror.js"></script>
+    <script src="data/js/raphael.js"></script>
+    <script src="data/js/tortoise.js"></script>
+    <script src="https://raw.github.com/QWRp/PL101/master/tortoise/parser.js"></script>
+    <script src="https://raw.github.com/QWRp/PL101/master/tortoise/interpreter.js"></script>
+    <script src="https://raw.github.com/QWRp/PL101/master/tortoise/tortoise.js"></script>
+    <script>
+        $("#error_box").hide();
+
+        var editor = CodeMirror.fromTextArea(document.getElementById("input"), {
+            theme: 'elegant',
+            lineNumbers: true,
+            onCursorActivity: function () {
+                editor.setLineClass(hlLine, null, null);
+                hlLine = editor.setLineClass(editor.getCursor().line, null, "activeline");
+            }
+        });
+
+        var hlLine = editor.setLineClass(0, "activeline");
+        editor.focus();
+
+        var log_console = function (msg) {
+            $('#console').append('<p>' + msg +'</p>');
+        };
+
+        $(function () {
+            var elem = $('#turtlecanvas'), paper = Raphael('turtlecanvas', elem.width(), elem.width());
+            var env = create_basic_environment(new Turtle(paper, elem.width(), elem.width()), 'turtlecanvas');
+            env.outer.bindings.clear();
+
+            $('#submit-button').click(function () {
+                var user_text = editor.getValue();
+                $('#console').html('');
+                env.bindings = {};
+                env.outer.bindings.select_turtle(lookup(env, 'default_turtle'));
+                env.outer.bindings.clear();
+
+                $('#error_box').hide();
+
+                try {
+                    var parsed = TORTOISE.parse(user_text);
+                    try {
+                        var result = evalStatements(parsed, env);
+                    }
+                    catch (e) {
+                        log_console('Eval Error: ' + e);
+                        $('#error_message').html('' + e);
+                        $('#error_type').html('Eval error!');
+                        $('#error_box').show();
+                    }
+                }
+                catch (e) {
+                    log_console('Parse Error: ' + e);
+                    $('#error_message').html('' + e);
+                    $('#error_type').html('Parse error!');
+                    $('#error_box').show();
+                }
+				
+				return false;
+            });
+
+            $('#clear-button').click(function () {
+                $('#error_box').hide();
+                $('#console').html('');
+                env.bindings = {};
+                env.outer.bindings.select_turtle(lookup(env, 'default_turtle'));
+                env.outer.bindings.clear();
+				
+				return false;
+            });
+			
+			$('.load_example').click(function (e) {
+                e.preventDefault();
+
+                var example = $(this).data('example'), example_data = $.trim($("#"+example).html());
+                editor.setValue(example_data);
+
+                $('#submit-button').click();
+            });
+        });
+    </script>
+</body>
+</html>

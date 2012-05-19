@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Scheem Tests</title>
+    <link rel="stylesheet" href="../data/css/mocha.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="../data/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+        #stats .progress {
+            height: 50px;
+        }
+
+        #stats {
+            position: static;
+        }
+    </style>
+    <link href="../data/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class ="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a class="brand" href="../">Scheem Online Interpreter</a>
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li><a href="../">Home</a></li>
+                    <li class="active"><a href="#">Unit Tests</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            <h1>Unit Tests</h1>
+            <div class="well">
+                <div id="mocha"></div>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <footer>
+        <p>See more on <a href="https://github.com/QWRp/PL101">GitHub</a>.</p>
+    </footer>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="../data/js/chai.js"></script>
+<script src="../data/js/mocha.js"></script>
+<script src="../data/js/bootstrap.min.js"></script>
+
+<script>mocha.setup('tdd')</script>
+<script src="https://raw.github.com/QWRp/PL101/master/tortoise/parser.js"></script>
+<script src="https://raw.github.com/QWRp/PL101/master/tortoise/interpreter.js"></script>
+<script src="https://raw.github.com/QWRp/PL101/master/tortoise/test/parser.test.js"></script>
+<script src="https://raw.github.com/QWRp/PL101/master/tortoise/test/interpreter.test.js"></script>
+<script>
+    $(function() {
+        mocha.run();
+    });
+</script>
+
+</body>
+</html>
